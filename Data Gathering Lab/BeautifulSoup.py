@@ -5,8 +5,10 @@ import seaborn as sns
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
 import re
+from pylab import rcParams
 
 url = "https://www.hubertiming.com/results/2023WyEasterLong"
+#url = "http://www.hubertiming.com/results/2017GPTR10K"
 html = urlopen(url)
 
 soup = BeautifulSoup(html, 'lxml')
@@ -101,7 +103,7 @@ df7.rename(columns={'[Place': 'Place'},inplace=True)
 df7.rename(columns={' Team]': 'Team'},inplace=True)
 df7.head()
 
-df7['Name'] = df7['Name'].str.strip(']')
+df7[' Name'] = df7[' Name'].str.strip(']')
 df7.head()
 
 time_list = df7[' Time'].tolist()
@@ -128,7 +130,6 @@ df7.head()
 
 df7.describe(include=[np.number])
 
-from pylab import rcParams
 rcParams['figure.figsize'] = 15, 5
 
 
@@ -141,12 +142,25 @@ x = df7['Runner_mins']
 ax = sns.distplot(x, hist=True, kde=True, rug=False, color='m', bins=25, hist_kws={'edgecolor':'black'})
 plt.show()
 
-
+# This below does no work
+'''
 f_fuko = df7.loc[df7[' Gender']==' F']['Runner_mins']
 m_fuko = df7.loc[df7[' Gender']==' M']['Runner_mins']
-sns.distplot(f_fuko, hist=True, kde=True, rug=False, hist_kws={'edgecolor':'black'}, label='Female')
-sns.distplot(m_fuko, hist=False, kde=True, rug=False, hist_kws={'edgecolor':'black'}, label='Male')
+sns.displot(f_fuko, hist=True, kde=True, rug=False, hist_kws={'edgecolor':'black'}, label='Female')
+sns.displot(m_fuko, hist=False, kde=True, rug=False, hist_kws={'edgecolor':'black'}, label='Male')
 plt.legend()
+'''
+# This is the corrected version that got close to the graph in the activity 
+f_fuko = df7.loc[df7[' Gender'] == ' F']['Runner_mins']
+m_fuko = df7.loc[df7[' Gender'] == ' M']['Runner_mins']
+all_runners = df7['Runner_mins']
+fig, ax = plt.subplots(figsize=(10, 6))
+sns.histplot(all_runners, bins=25, stat='density', edgecolor='black', 
+             color='lightblue', alpha=0.6, label='All Runners', ax=ax)
+sns.kdeplot(f_fuko, label='Female KDE', ax=ax, color='darkblue')
+sns.kdeplot(m_fuko, label='Male KDE', ax=ax, color='orange')
+ax.legend()
+plt.show()
 
 g_stats = df7.groupby(" Gender", as_index=True).describe()
 print(g_stats)
