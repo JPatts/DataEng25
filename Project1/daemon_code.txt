@@ -1,0 +1,17 @@
+# /etc/systemd/system/subscriber.service 
+
+[Unit]
+Description=Pub/Sub bus‑breadcrumb subscriber
+After=network‑online.target
+
+[Service]
+User=mrsloggett
+WorkingDirectory=/home/mrsloggett/subscriber
+ExecStart=/home/mrsloggett/subscriber/venv/bin/python /home/mrsloggett/subscriber/subscriber.py
+
+Environment=PYTHONUNBUFFERED=1
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
